@@ -6,9 +6,9 @@ Script to automatically perform zonal OCR on a PDF and rename the PDF according 
 This script scratches a specific itch our HR department has, namely to process thousands of uniform PDFs twice a month. As such it is geared twoards many same-looking PDFs that come in bunches of several hundreds pages per PDF. We need each page as a single sheet identifiable by an ID on the page. So we first burst the PDF into single page PDFs and then run OCR over a zone on each PDF and put the result into a temporary file. We read the temporary file and rename the single page PDF. 
 
 # Quickstart:
-# 1) Install required packages
+# 1) Install required packages (The example is for Debian)
 
- $apt-get install tesseract-ocr tesseract-ocr-<yourlanguage> imagemagick pdftk
+ $apt-get install tesseract-ocr tesseract-ocr-[yourlanguage] imagemagick pdftk
 
 # 2) Convert your source file to a tiff-image. 
 
@@ -43,6 +43,8 @@ The tiff must fullfill the following requirement
 Future plans:
 If we can't get the commercial solution working to our demands, we will implement
 1) parallel processing of many PDFs.
+
 2) a folder watchdog ([id]notify) to run the script whenever a PDF is dropped into the watched folder.
+
 3) Learn github's markup.
 

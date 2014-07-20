@@ -16,33 +16,27 @@ EXT=".pdf"
 # Beware, this can make your machine unresponsive if you have several PDFs with many pages (>1000). 
 
 function createWorkingArea {
+	mkdir Vorlagen
 	for f in *.pdf
 	do 
-		t=$(basename $f .pdf)
-		mkdir dir_$t
-		cp $f dir_$t
-		burstPDF $f dir_$t
+		pre=$(basename $f .pdf)
+		echo 1:$pre
+		# PDFTK
+		pdftk $f burst output ${pre}_%05d.pdf
+		mv $f Vorlagen/
+		worker $pre
+
 	done
 }
 
-function burstPDF {
-	file=$1
-	directory=$2
-	cd $directory
-
-	# PDFTK
-	pdftk $file burst
-	rm -f $file
-
-	# Start Worker
-	worker
-}
-
 function worker {
-	for file in pg*.pdf
+	pre=$1
+	echo 2:$pre
+	for file in ${pre}*.pdf
 	do
+		echo 3:$file
 		base=$(basename $file .pdf)
-
+		echo 4:$base
 		echo $UZN > $base.uzn
 		convert -depth 8 -density 300 -trim -strip $file $base.tiff
 		ocr $base.tiff tmp_$base deu 4

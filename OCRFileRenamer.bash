@@ -20,7 +20,6 @@ function createWorkingArea {
 	for f in *.pdf
 	do 
 		pre=$(basename $f .pdf)
-		echo 1:$pre
 		# PDFTK
 		pdftk $f burst output ${pre}_%05d.pdf
 		mv $f Vorlagen/
@@ -31,12 +30,9 @@ function createWorkingArea {
 
 function worker {
 	pre=$1
-	echo 2:$pre
 	for file in ${pre}*.pdf
 	do
-		echo 3:$file
 		base=$(basename $file .pdf)
-		echo 4:$base
 		echo $UZN > $base.uzn
 		convert -depth 8 -density 300 -trim -strip $file $base.tiff
 		ocr $base.tiff tmp_$base deu 4
@@ -68,7 +64,7 @@ function ocr {
 	output=$2
 	lang=$3
 	level=$4
-	tesseract $input $output -l $lang -psm $level
+	tesseract $input $output -l $lang -psm $level &> /dev/null
 }
 
 createWorkingArea

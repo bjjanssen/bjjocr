@@ -10,6 +10,7 @@ NN="NoName"
 EXT=".pdf"
 INPATH="./Import"
 OUTPATH="./Export"
+DONE="./Done"
 
 function createWorkingArea {
 	for f in ${INPATH}/*.pdf
@@ -18,6 +19,8 @@ function createWorkingArea {
 		# PDFTK
 		pdftk $f burst output ${pre}_%05d.pdf
 		worker $pre
+		echo "Wann?"
+		mv $f $DONE
 	done
 }
 

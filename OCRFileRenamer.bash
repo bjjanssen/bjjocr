@@ -81,6 +81,12 @@ function worker {
 function uzn_ID {
 	echo $UZN_id > $base.uzn
 	ocr $base.tiff id_$base deu 4
+
+#	
+#	todo:
+#	Ist die letzte Stelle eine 1, wird sie als "l" erkannt.
+#
+
 	persid=$(grep -P '[0-9]{4,8}' id_$base.txt)
 	
 }
@@ -156,7 +162,8 @@ function mergeSameIDs {
 	do
         	base=$(basename $f .001)
 	        pdftk ${base}.* cat output complete_${base}.pdf
-        	mv -v ${base}.* joined/
+        	
+		rm -f ${base}.*
 	        mv -n -v complete_${base}.pdf ${base}.pdf
 	done
 	echo "Finished Merge"

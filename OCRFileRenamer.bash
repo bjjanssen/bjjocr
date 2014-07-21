@@ -5,9 +5,14 @@
 
 ### Globals ###
 
-UZN="1900 50 250 50 PerNR"
+UZN_id="1900 50 250 50 PerNR"
+UZN_Mon="1500 50 250 50 Month"
+UZN_Year="1700 50 250 50 Year"
 NN="NoName"
 EXT=".pdf"
+DOC="LA"
+MM="05"
+YYYY="2014"
 
 BASEPATH="/mnt/HR_scan_import_to_kiss/LA"
 WORKINGDIR="/opt"
@@ -49,12 +54,12 @@ function worker {
 	for file in ${pre}*.pdf
 	do
 		base=$(basename $file .pdf)
-		echo $UZN > $base.uzn
+		echo $UZN_id > $base.uzn
 		convert -depth 8 -density 300 -trim -strip $file $base.tiff
 		ocr $base.tiff id_$base deu 4
 
 		persid=$(grep -P '[0-9]{4,8}' id_$base.txt)
-		NN="LA_06_2014_$persid"
+		NN="${DOC}_${MM}_${YYYY}_$persid"
 
 		rm -f $base.tiff 
 		rm -f $base.uzn

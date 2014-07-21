@@ -146,6 +146,10 @@ function ocr {
 }
 
 function mergeSameIDs {
+#
+#	todo: Fehler abfangen!
+#
+
 	echo "Start Merge"
 	cd $OUTPATH
 	for f in *.001

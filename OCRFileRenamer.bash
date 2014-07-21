@@ -64,7 +64,20 @@ function ocr {
 	tesseract $input $output -l $lang -psm $level &> /dev/null
 }
 
+function mergeSameIDs {
+	echo "Start Merge"
+	for f in *.001
+	do
+        	base=$(basename $f .001)
+	        pdftk ${base}.* cat output complete_${base}.pdf
+        	mv -v ${base}.* joined/
+	        mv -n -v complete_${base}.pdf ${base}.pdf
+	done
+	echo "Finished Merge"
+}
+
 createWorkingArea
+mergeSameIDs
 echo "$(date +%F_%T) END"
 exit
 

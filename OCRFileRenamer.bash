@@ -1,18 +1,37 @@
 #!/bin/bash
 
 # This is a simple OCR-based file renamer.
-# Last modified 2014-07-20 bjoern.janssen
+# Last modified 2014-07-21 bjoern.janssen
 
 ### Globals ###
 
 UZN="1900 50 250 50 PerNR"
 NN="NoName"
 EXT=".pdf"
-INPATH="./Import"
-OUTPATH="./Export"
-DONE="./Done"
+
+BASEPATH="/mnt/HR_scan_import_to_kiss/LA"
+WORKINGDIR="/opt"
+INPATH="/opt/Import/LA"
+OUTPATH="/opt/Export/LA"
+DONE="/opt/Done/LA"
 
 function createWorkingArea {
+
+	if ! [ -d $INPATH ]
+	then
+		mkdir -p $INPATH
+	fi
+
+	if ! [ -d $OUTPATH ]
+	then
+		mkdir -p $OUTPATH
+	fi
+
+	if ! [ -d $DONE ]
+	then
+		mkdir -p $DONE
+	fi
+	
 	echo "$(date +%F_%T) BEGIN"
 	for f in ${INPATH}/*.pdf
 	do 
@@ -32,14 +51,14 @@ function worker {
 		base=$(basename $file .pdf)
 		echo $UZN > $base.uzn
 		convert -depth 8 -density 300 -trim -strip $file $base.tiff
-		ocr $base.tiff tmp_$base deu 4
+		ocr $base.tiff id_$base deu 4
 
-		persid=$(grep -P '[0-9]{4,8}' tmp_$base.txt)
+		persid=$(grep -P '[0-9]{4,8}' id_$base.txt)
 		NN="LA_06_2014_$persid"
 
 		rm -f $base.tiff 
 		rm -f $base.uzn
-		rm -f tmp_$base.txt
+		rm -f id_$base.txt
 
 		count=1
 		FNN=$NN$EXT
@@ -66,6 +85,7 @@ function ocr {
 
 function mergeSameIDs {
 	echo "Start Merge"
+	cd $OUTPATH
 	for f in *.001
 	do
         	base=$(basename $f .001)
@@ -76,6 +96,7 @@ function mergeSameIDs {
 	echo "Finished Merge"
 }
 
+cd $WORKINGPATH
 createWorkingArea
 mergeSameIDs
 echo "$(date +%F_%T) END"

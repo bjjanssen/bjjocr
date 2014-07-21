@@ -13,13 +13,14 @@ OUTPATH="./Export"
 DONE="./Done"
 
 function createWorkingArea {
+	echo "$(date +%F_%T) BEGIN"
 	for f in ${INPATH}/*.pdf
 	do 
+		echo "$(date +%F_%T) Processing $f"
 		pre=$(basename $f .pdf)
 		# PDFTK
 		pdftk $f burst output ${pre}_%05d.pdf
 		worker $pre
-		echo "Wann?"
 		mv $f $DONE
 	done
 }
@@ -64,5 +65,6 @@ function ocr {
 }
 
 createWorkingArea
+echo "$(date +%F_%T) END"
 exit
 

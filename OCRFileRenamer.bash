@@ -54,11 +54,9 @@ function worker {
 	for file in ${pre}*.pdf
 	do
 		base=$(basename $file .pdf)
-		echo $UZN_id > $base.uzn
 		convert -depth 8 -density 300 -trim -strip $file $base.tiff
-		ocr $base.tiff id_$base deu 4
-
-		persid=$(grep -P '[0-9]{4,8}' id_$base.txt)
+		uzn_ID
+		
 		NN="${DOC}_${MM}_${YYYY}_$persid"
 
 		rm -f $base.tiff 
@@ -78,6 +76,65 @@ function worker {
 		mv -n -v $file ${OUTPATH}/$FNN
 
 	done
+}
+
+function uzn_ID {
+	echo $UZN_id > $base.uzn
+	ocr $base.tiff id_$base deu 4
+	persid=$(grep -P '[0-9]{4,8}' id_$base.txt)
+	
+}
+
+function uzn_Mon {
+	echo $UZN_Mon > $base.uzn
+	ocr $base.tiff Mon_$base deu 4
+	tmpMon=$(grep -P '[A-z][a-z]{3,8}' Mon_$base.txt)
+	
+	case $tmpMon in
+		Januar|January)
+			MM="01"
+			;;
+		Februar|February)
+			MM="02"
+			;;
+		März|Maerz|March)
+			MM="03"
+			;;
+		April)
+			MM="04"
+			;;
+		Mai|May)
+			MM="05"
+			;;
+		Juni|June)
+			MM="06"
+			;;
+		Juli|July)
+			MM="07"
+			;;
+		August)
+			MM="08"
+			;;
+		September|Septembre)
+			MM="09"
+			;;
+		Oktober|October)
+			MM="10"
+			;;
+		November|Novembre)
+			MM="11"
+			;;
+		Dezember|Decembre|December)
+			MM="12"
+			;;
+		*)
+			MM=$(date +%m)
+}
+
+function uzn_Year {
+	echo $UZN_Year > $base.uzn
+	ocr $base.tiff Year_$base deu 4
+	YYYY=$(grep -P '[0-9]{4}' Year_$base.txt)
 }
 
 function ocr {

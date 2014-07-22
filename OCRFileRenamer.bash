@@ -3,11 +3,18 @@
 # This is a simple OCR-based file renamer.
 # Last modified 2014-07-21 bjoern.janssen
 
+### Settings ###
+### true/false
+
+enable_UZN_ID=true
+enable_UZN_MM=false
+enable_UZN_YYYY=false
+
 ### Globals ###
 
-UZN_id="1900 50 250 50 PerNR"
-UZN_Mon="1500 50 250 50 Month"
-UZN_Year="1700 50 250 50 Year"
+UZN_ID="1900 50 250 50 PerNR"
+UZN_MM="1500 50 250 50 Month"
+UZN_YYYY="1700 50 250 50 Year"
 NN="NoName"
 EXT=".pdf"
 DOC="LA"
@@ -55,13 +62,28 @@ function worker {
 	do
 		base=$(basename $file .pdf)
 		convert -depth 8 -density 300 -trim -strip $file $base.tiff
-		uzn_ID
-		
+#
+#	Abgeschaltete uzn sind noch nicht korrekt vermessen.
+#
+		if [ $enable_UZN_ID = "true" ]
+		then
+			uzn_ID
+		fi
+
+		if [ $enable_UZN_MM = "true" ]
+		then
+			uzn_MM		
+		fi
+
+		if [ $enable_UZN_YYYY = "true" ]
+		then
+			uzn_YYYY
+		fi
+
 		NN="${DOC}_${MM}_${YYYY}_$persid"
 
 		rm -f $base.tiff 
 		rm -f $base.uzn
-		rm -f id_$base.txt
 
 		count=1
 		FNN=$NN$EXT
@@ -79,31 +101,32 @@ function worker {
 }
 
 function uzn_ID {
-	echo $UZN_id > $base.uzn
-	ocr $base.tiff id_$base deu 4
+	echo $UZN_ID > $base.uzn
+	ocr $base.tiff ID_$base deu 4
 
 #	
-#	todo:
-#	Ist die letzte Stelle eine 1, wird sie als "l" erkannt.
+#	Fieser hack! Richtig wäre es, wenn wir tesseract auf bessere l/1 Erkennung trainieren würden.
+#	https://code.google.com/p/tesseract-ocr/wiki/TrainingTesseract3
 #
 
-	persid=$(grep -P '[0-9]{4,8}' id_$base.txt)
-	
+	cat ID_$base.txt | tr l 1 > ID_$base.txt2
+	persid=$(grep -P '[0-9]{4,8}' ID_$base.txt2)
+	rm -f ID_$base.txt*
 }
 
-function uzn_Mon {
-	echo $UZN_Mon > $base.uzn
-	ocr $base.tiff Mon_$base deu 4
-	tmpMon=$(grep -P '[A-z][a-z]{3,8}' Mon_$base.txt)
+function uzn_MM {
+	echo $UZN_MM > $base.uzn
+	ocr $base.tiff MM_$base deu 4
+	tmpMM=$(grep -P '[A-z][a-z]{3,8}' MM_$base.txt)
 	
-	case $tmpMon in
+	case $tmpMM in
 		Januar|January)
 			MM="01"
 			;;
 		Februar|February)
 			MM="02"
 			;;
-		März|Maerz|March)
+		März|Maerz|Marz|March)
 			MM="03"
 			;;
 		April)
@@ -135,12 +158,16 @@ function uzn_Mon {
 			;;
 		*)
 			MM=$(date +%m)
+	esac
+	
+	rm -f MM_$base.txt
 }
 
-function uzn_Year {
-	echo $UZN_Year > $base.uzn
-	ocr $base.tiff Year_$base deu 4
-	YYYY=$(grep -P '[0-9]{4}' Year_$base.txt)
+function uzn_YYYY {
+	echo $UZN_YYYY > $base.uzn
+	ocr $base.tiff YYYY_$base deu 4
+	YYYY=$(grep -P '[0-9]{4}' YYYY_$base.txt)
+	rm -f YYYY_$base.txt
 }
 
 function ocr {
@@ -161,10 +188,12 @@ function mergeSameIDs {
 	for f in *.001
 	do
         	base=$(basename $f .001)
-	        pdftk ${base}.* cat output complete_${base}.pdf
+		echo "$(date +%F_%T) Merging $base"
+		
+	        pdftk ${base}.* cat output merged_${base}.pdf
         	
 		rm -f ${base}.*
-	        mv -n -v complete_${base}.pdf ${base}.pdf
+	        mv -n -v merged_${base}.pdf ${base}.pdf
 	done
 	echo "Finished Merge"
 }

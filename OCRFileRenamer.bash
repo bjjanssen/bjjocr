@@ -9,6 +9,8 @@
 enable_UZN_ID=true
 enable_UZN_MM=false
 enable_UZN_YYYY=false
+enable_file_MM=false
+enable_file_YYYY=false
 
 ### Globals ###
 
@@ -21,11 +23,11 @@ DOC="LA"
 MM="05"
 YYYY="2014"
 
-BASEPATH="/mnt/HR_scan_import_to_kiss/LA"
-WORKINGDIR="/opt"
-INPATH="/opt/Import/LA"
-OUTPATH="/opt/Export/LA"
-DONE="/opt/Done/LA"
+# COPYPATH="/mnt/HR_scan_import_to_kiss/LA" ### unused. We copy the results by cronjob.
+WORKINGDIR="/opt/ocr"
+INPATH="$WORKINGDIR/Import/$DOC"
+OUTPATH="$WORKINGDIR/Export/$DOC"
+DONE="$WORKINGDIR/Done/$DOC"
 
 function createWorkingArea {
 
@@ -72,12 +74,25 @@ function worker {
 
 		if [ $enable_UZN_MM = "true" ]
 		then
-			uzn_MM		
+			uzn_MM
+
+		elif [ $enable_file_MM = "true" ]
+			MM=$(echo $base | cut -d'-' -f2)	
+
+		else
+			echo "Using default setting for month: $MM"
 		fi
 
 		if [ $enable_UZN_YYYY = "true" ]
 		then
 			uzn_YYYY
+
+		elif [ enable_file_YYYY = "true" ]
+			tmp=${base#*_}
+			YYYY=$(echo $tmp | cut -d'-' -f1)
+
+		else 
+			echo "Using default setting for year: $YYYY"
 		fi
 
 		NN="${DOC}_${MM}_${YYYY}_$persid"
@@ -129,7 +144,7 @@ function uzn_MM {
 		März|Maerz|Marz|March)
 			MM="03"
 			;;
-		April)
+		April|Apr)
 			MM="04"
 			;;
 		Mai|May)

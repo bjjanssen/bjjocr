@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # This is a simple OCR-based file renamer.
-# Last modified 2014-07-21 bjoern.janssen
+# Last modified 2014-07-24 bjoern janssen studitemps de
 
 ### Settings ###
 ### true/false
@@ -36,12 +36,26 @@ INPATH="$WORKINGDIR/Import/$DOC"
 OUTPATH="$WORKINGDIR/Export/$DOC"
 DONE="$WORKINGDIR/Done/$DOC"
 
+# We check if our export directory is empty.
+function cleanSpace {
+	empty=$(ls $OUTPATH/* 2> /dev/null | wc -l)
+	if [ "$empty" != "0" ]; then
+		echo "Export target not empty. Moving old stuff."
+		MOVE=old_$(date +%F_%T)
+		mkdir -p $OUTPATH/$MOVE)
+		mv -n -v $OUTPATH/* $OUTPATH/$MOVE
+	else 
+		echo "Export target is clean."
+	fi
+}
 
 # We burst every input PDF into single-page PDFs and start a worker on each single-page PDF. 
 # If, for any reason, 99999 PDFs is not enough increase the %05 number to something higher than 5. 
 # In principle we can start multiple processes here by putting a & behind worker. 
 # Since we are NOT tracking which PDF is being processed right now, this is not advisable for now.
 function createWorkingArea {
+
+	echo "$(date +%F_%T) BEGIN"
 
 	if ! [ -d $INPATH ]; then
 		mkdir -p $INPATH
@@ -54,8 +68,9 @@ function createWorkingArea {
 	if ! [ -d $DONE ]; then
 		mkdir -p $DONE
 	fi
+
+	cleanSpace
 	
-	echo "$(date +%F_%T) BEGIN"
 	for f in ${INPATH}/*.pdf
 	do 
 		echo "$(date +%F_%T) Processing $f"
@@ -74,7 +89,7 @@ function worker {
 		base=$(basename $file .pdf)
 		convert -depth 8 -density 300 -trim -strip $file $base.tiff
 #
-#	Abgeschaltete uzn sind noch nicht korrekt vermessen.
+# Disabled UZNs are not correctly measured yet.
 #
 		if [ $enable_UZN_ID = "true" ]; then
 			uzn_ID

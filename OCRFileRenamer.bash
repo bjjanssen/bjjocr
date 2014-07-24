@@ -42,7 +42,12 @@ function cleanSpace {
 	if [ "$empty" != "0" ]; then
 		echo "Export target not empty. Moving old stuff."
 		MOVE=old_$(date +%F_%T)
-		mkdir -p $OUTPATH/$MOVE)
+
+		#
+		# This obviously throws a warning that the dir cannot be moved into itself.
+		#
+
+		mkdir -p $OUTPATH/$MOVE
 		mv -n -v $OUTPATH/* $OUTPATH/$MOVE
 	else 
 		echo "Export target is clean."
@@ -81,6 +86,15 @@ function createWorkingArea {
 		mv $f $DONE
 	done
 }
+
+
+# The worker converts the PDF to a tiff-image and applies all enabled discovery methods. 
+# It then creates a new file name for the PDF and checks if it already exists. 
+# If not it writes the new name, otherwise it increments a running number for an updated extension.
+#
+# todo: break out discovery into functions 
+# todo: capture the YYYY/YYYY+1 overlap in filename based discovery (i. e. if the filename suggests 2014-01 the included PDFs probably apply to 2013-12.
+#
 
 function worker {
 	pre=$1

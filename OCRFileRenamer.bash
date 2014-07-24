@@ -209,7 +209,7 @@ function mergeSameIDs {
 	echo "Start Merge"
 	check=$(ls $OUTPATH/*.001 2> /dev/null | wc -l)
 
-	if [ "$check" != "0"]; then
+	if [ "$check" != "0" ]; then
 		cd $OUTPATH
 		for f in *.001
 		do

@@ -207,18 +207,26 @@ function mergeSameIDs {
 #
 
 	echo "Start Merge"
-	cd $OUTPATH
-	for f in *.001
-	do
-        	base=$(basename $f .001)
-		echo "$(date +%F_%T) Merging $base"
-		
-	        pdftk ${base}.* cat output merged_${base}.pdf
+	check=$(ls $OUTPATH/*.001 2> /dev/null | wc -l)
+
+	if [ "$check" != "0"]; then
+		cd $OUTPATH
+		for f in *.001
+		do
+        		base=$(basename $f .001)
+			echo "$(date +%F_%T) Merging $base"
+			
+	        	pdftk ${base}.* cat output merged_${base}.pdf
         	
-		rm -f ${base}.*
-	        mv -n -v merged_${base}.pdf ${base}.pdf
-	done
+			rm -f ${base}.*
+		        mv -n -v merged_${base}.pdf ${base}.pdf
+		done
+	else
+		echo "Nothing to merge"
+	fi
+
 	echo "Finished Merge"
+	
 }
 
 cd $WORKINGPATH

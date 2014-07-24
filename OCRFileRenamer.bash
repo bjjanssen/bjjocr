@@ -6,22 +6,29 @@
 ### Settings ###
 ### true/false
 
+# Enable discovery via OCR
 enable_UZN_ID=true
 enable_UZN_MM=false
 enable_UZN_YYYY=false
+
+#Enable discovery via filename
 enable_file_MM=false
 enable_file_YYYY=false
 
 ### Globals ###
-
-UZN_ID="1900 50 250 50 PerNR"
-UZN_MM="1500 50 250 50 Month"
-UZN_YYYY="1700 50 250 50 Year"
-NN="NoName"
-EXT=".pdf"
+# Defaults for discovery
 DOC="LA"
 MM="05"
 YYYY="2014"
+
+# Defaults for file naming
+NN="NoName" 
+EXT=".pdf"
+
+# Values for OCR zones
+UZN_ID="1900 50 250 50 PerNR"
+UZN_MM="1500 50 250 50 Month" # not tested
+UZN_YYYY="1700 50 250 50 Year" # not tested
 
 # COPYPATH="/mnt/HR_scan_import_to_kiss/LA" ### unused. We copy the results by cronjob.
 WORKINGDIR="/opt/ocr"
@@ -29,20 +36,22 @@ INPATH="$WORKINGDIR/Import/$DOC"
 OUTPATH="$WORKINGDIR/Export/$DOC"
 DONE="$WORKINGDIR/Done/$DOC"
 
+
+# We burst every input PDF into single-page PDFs and start a worker on each single-page PDF. 
+# If, for any reason, 99999 PDFs is not enough increase the %05 number to something higher than 5. 
+# In principle we can start multiple processes here by putting a & behind worker. 
+# Since we are NOT tracking which PDF is being processed right now, this is not advisable for now.
 function createWorkingArea {
 
-	if ! [ -d $INPATH ]
-	then
+	if ! [ -d $INPATH ]; then
 		mkdir -p $INPATH
 	fi
 
-	if ! [ -d $OUTPATH ]
-	then
+	if ! [ -d $OUTPATH ]; then
 		mkdir -p $OUTPATH
 	fi
 
-	if ! [ -d $DONE ]
-	then
+	if ! [ -d $DONE ]; then
 		mkdir -p $DONE
 	fi
 	
@@ -67,27 +76,26 @@ function worker {
 #
 #	Abgeschaltete uzn sind noch nicht korrekt vermessen.
 #
-		if [ $enable_UZN_ID = "true" ]
-		then
+		if [ $enable_UZN_ID = "true" ]; then
 			uzn_ID
 		fi
 
-		if [ $enable_UZN_MM = "true" ]
-		then
+		if [ $enable_UZN_MM = "true" ]; then
 			uzn_MM
 
-		elif [ $enable_file_MM = "true" ]
-			MM=$(echo $base | cut -d'-' -f2)	
+		elif [ $enable_file_MM = "true" ]; then
+			tmpMM=$(echo $base | cut -d'-' -f2)	
+			let tmpMM=$tmpMM-1
+			MM=$(printf '%02d' tmpMM)
 
 		else
 			echo "Using default setting for month: $MM"
 		fi
 
-		if [ $enable_UZN_YYYY = "true" ]
-		then
+		if [ $enable_UZN_YYYY = "true" ]; then
 			uzn_YYYY
 
-		elif [ enable_file_YYYY = "true" ]
+		elif [ enable_file_YYYY = "true" ]; then
 			tmp=${base#*_}
 			YYYY=$(echo $tmp | cut -d'-' -f1)
 
